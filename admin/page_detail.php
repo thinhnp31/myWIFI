@@ -109,8 +109,8 @@
 
       //Update other parameters
       if ($uploadOk) {        
-        $stmt = $conn->prepare("UPDATE pages SET welcome = ?, connection_type = ?, ad_url = ?, profile_id = ? WHERE page_id = ?");
-        $stmt->bind_param('sssii', $_POST['welcome'], $_POST['connection_type'], $_POST['ad_url'], $_POST['profile_id'], $page_id);
+        $stmt = $conn->prepare("UPDATE pages SET welcome = ?, connection_type = ?, ad_url = ?, profile_id = ?, youtube_link = ?, countdown = ? WHERE page_id = ?");
+        $stmt->bind_param('sssisii', $_POST['welcome'], $_POST['connection_type'], $_POST['ad_url'], $_POST['profile_id'], $_POST['youtube_link'], $_POST['countdown'], $page_id);
         $stmt->execute();
         $msg = "Cập nhật thành công";
         $type = "success";
@@ -138,6 +138,8 @@
     $profile_id = $row['profile_id'];
     $ad_url = $row['ad_url'];
     $welcome = $row['welcome'];
+    $youtube_link = $row['youtube_link'];
+    $countdown = $row['countdown'];
 ?>
 
 <!DOCTYPE html>
@@ -245,26 +247,32 @@
                       
                     <div class="mb-4" >
                       <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Hình thức:</label>
-                      <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="connection_type" required id="connection_type" oninput="display_guide();">
-                        <option value="image" <?php if ($connection_type== "image") echo "selected"; ?>>Hình ảnh</option>
+                      <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="connection_type" required id="connection_type" onchange="display_guide();">
+                        <option value="image" <?php if ($connection_type== "image") echo "selected"; ?>>Hình ảnh</option>                        
                         <option value="video" <?php if ($connection_type== "video") echo "selected"; ?>>Video</option>
-                        <option value="local_account" <?php if ($connection_type== "local_account") echo "selected"; ?>>Tài Khoản</option>
-                        <option value="sms" <?php if ($connection_type== "sms") echo "selected"; ?>>SMS</option>
-                        <option value="social" <?php if ($connection_type== "social") echo "selected"; ?>>Mạng xã hội</option>
-                        <option value="survey" <?php if ($connection_type== "survey") echo "selected"; ?>>Khảo sát</option>
-                        <option value="voucher" <?php if ($connection_type== "voucher") echo "selected"; ?>>Voucher</option>
+                        <option value="local_account" <?php if ($connection_type== "local_account") echo "selected"; ?>>Tài Khoản</option>      
                       </select>                           
+                    </div>
+
+                    <div class="mb-4" id="youtube_link">
+                      <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Link Youtube: </label>
+                      <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" id="youtube_link_input" name="youtube_link" value="<?php echo $youtube_link; ?>">
+                    </div>
+
+                    <div class="mb-4" id="countdown">
+                      <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">CountDown : </label>
+                      <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" name="countdown" type="number" min="1" id="countdown_input" value="<?php echo $countdown ?>">
                     </div>
 
                     <div class="mb-4" id="ad_url_container">
                       <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Trang quảng cáo : </label>
-                      <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" name="ad_url" id="ad_url" style="display:none;" value="<?php echo $ad_url; ?>">
+                      <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" name="ad_url" id="ad_url" value="<?php echo $ad_url; ?>">
                     </div>
 
                     <div class="mb-4">
                       <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Profile : </label>
                       <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="profile_id" required id="profile_id">
-                        <?php
+                        <?php($_FILES["background"]["size"] > 0)
                           $stmt = $conn->prepare("SELECT * FROM profiles");
                           $stmt->execute();
                           $result = $stmt->get_result();
@@ -273,8 +281,8 @@
                         ?>
                               <option value=<?php echo $row['profile_id'];?> <?php  if ($row['profile_id'] == $profile_id) echo "selected"; ?>><?php echo $row['profile_name'];?> </option>
                         <?php
-                            }
-                          }
+                            
+                          
                         ?>                          
                       </select>
                     </div>
@@ -465,44 +473,48 @@
         case "image":
           $("#guide_pc").load("includes/guide/image.html");
           $("#guide_mobile").load("includes/guide/image.html");
-          document.getElementById("ad_url").style.display="block";
-          document.getElementById("ad_url_container").style.display="block";
+          $("#youtube_link").hide();
+          $("#countdown").hide();
+          $("#youtube_link_input").attr("required", false);
+          $("#countdown_input").attr("required", false);
+          $("#background").attr("required", true);
+          $("#background_holder").show();
           break;
         case "video":
-          document.getElementById("guide_pc").src="includes/images/video_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/video_mobile.png";
-          document.getElementById("ad_url").style.display="block";
-          document.getElementById("ad_url_container").style.display="block";
+          $("#guide_pc").load("includes/guide/video.html");
+          $("#guide_mobile").load("includes/guide/video.html");
+          $("#youtube_link").show();          
+          $("#countdown").show();
+          $("#youtube_link_input").attr("required", true);
+          $("#countdown_input").attr("required", true);
+          $("#background").attr("required", false);
+          $("#background_holder").hide();
           break;
         case "local_account":
-          document.getElementById("guide_pc").src="includes/images/local_account_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/local_account_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/local_account.html");
+          $("#guide_mobile").load("includes/guide/local_account.html");
+          $("#youtube_link").hide();
+          $("#countdown").hide();
+          $("#youtube_link_input").attr("required", false);
+          $("#countdown_input").attr("required", false);
+          $("#background").attr("required", true);
+          $("#background_holder").show();
           break;
         case "sms":
-          document.getElementById("guide_pc").src="includes/images/sms_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/sms_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/sms.html");
+          $("#guide_mobile").load("includes/guide/sms.html");
           break;
         case "social":
-          document.getElementById("guide_pc").src="includes/images/social_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/social_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/social.html");
+          $("#guide_mobile").load("includes/guide/social.html");
           break;
         case "survey":
-          document.getElementById("guide_pc").src="includes/images/survey_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/survey_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/survey.html");
+          $("#guide_mobile").load("includes/guide/survey.html");
           break;
         case "voucher":
-          document.getElementById("guide_pc").src="includes/images/voucher_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/voucher_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/voucher.html");
+          $("#guide_mobile").load("includes/guide/voucher.html");
           break;
         default:
           break;

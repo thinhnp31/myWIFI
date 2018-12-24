@@ -251,85 +251,86 @@
                   </form>
                   <?php
                     if (isset($_GET['gwgroup_name']) && ($_GET['gwgroup_name'] != '')) {
-                      $stmt = $conn->prepare("SELECT * FROM gateway_groups RIGHT JOIN pages ON pages.page_id = gateway_groups.page_id WHERE gwgroup_name = ? ");
+                      $stmt = $conn->prepare("SELECT * FROM gateway_groups WHERE gwgroup_name = ? ");
                       $stmt->bind_param('s', $_GET['gwgroup_name']);
                     } else {
-                      $stmt = $conn->prepare("SELECT * FROM gateway_groups RIGHT JOIN pages ON pages.page_id = gateway_groups.page_id "); 
+                      $stmt = $conn->prepare("SELECT * FROM gateway_groups "); 
                     }
                     $stmt->execute();
                     $result = $stmt->get_result();      
-                        if ($result->num_rows > 0) { 
-                          while ($row = $result->fetch_assoc()) {
-                            if ($row['gwgroup_name'] != '') {
-                              $stmt2 = $conn->prepare("SELECT COUNT(id) as count FROM gateways WHERE gwgroup_id = ? ");
-                              $stmt2->bind_param('i', $row['gwgroup_id']);
-                              $stmt2->execute();
-                              $result2 = $stmt2->get_result();
-                              $row2 = $result2->fetch_assoc();
-                              $gateway_counts = $row2['count'];
+                    if ($result->num_rows > 0) { 
+                      while ($row = $result->fetch_assoc()) {
+                        if ($row['gwgroup_name'] != '') {
+                          $stmt2 = $conn->prepare("SELECT COUNT(id) as count FROM gateways WHERE gwgroup_id = ? ");
+                          $stmt2->bind_param('i', $row['gwgroup_id']);
+                          $stmt2->execute();
+                          $result2 = $stmt2->get_result();
+                          $row2 = $result2->fetch_assoc();
+                          $gateway_counts = $row2['count'];
                   ?>
-                              <form method="GET" action="#">
-                              <tr>
-                                
-                                <td>
-                                  <input type="text" value="<?php echo $row['gwgroup_name']; ?>" name='gwgroup_name' style="border:none;" readonly onclick="this.readOnly = false; document.getElementById('edit_<?php echo $row['gwgroup_id']; ?>').style.display = 'table-row';">
-                                </td>
-                                <td><?php echo $gateway_counts; ?></td>
-                                <td>
-                                  <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;border:none; background-color: white;" name="page_id" required  readonly onclick="this.readOnly = false; document.getElementById('edit_<?php echo $row['gwgroup_id']; ?>').style.display = 'table-row';">
-                                    <?php
-                                      $stmt3 = $conn->prepare("SELECT * FROM pages");
-                                      $stmt3->execute();
-                                      $result3 = $stmt3->get_result();
-                                      while ($row3 = $result3->fetch_assoc()) {
-                                    ?>
-                                      <option value=<?php echo $row3['page_id'];?> <?php if ($row3['page_id'] == $row['page_id']) echo 'selected';?> ><?php echo $row3['page_name']; ?></option>
-                                    <?php
-                                      }
-                                    ?>  
+                          <form method="GET" action="#">
+                            <tr>                                
+                              <td>
+                                <input type="text" value="<?php echo $row['gwgroup_name']; ?>" name='gwgroup_name' style="border:none;" readonly onclick="this.readOnly = false; document.getElementById('edit_<?php echo $row['gwgroup_id']; ?>').style.display = 'table-row';">
+                              </td>
+                              <td><?php echo $gateway_counts; ?></td>
+                              <td>
+                                <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;border:none; background-color: white;" name="page_id" required  readonly onclick="this.readOnly = false; document.getElementById('edit_<?php echo $row['gwgroup_id']; ?>').style.display = 'table-row';">
+                                  <?php
+                                    $stmt3 = $conn->prepare("SELECT * FROM pages");
+                                    $stmt3->execute();
+                                    $result3 = $stmt3->get_result();
+                                    $connection_type = "Không rõ";
+                                    while ($row3 = $result3->fetch_assoc()) {
+                                  ?>
+                                    <option></option>
+                                    <option value=<?php echo $row3['page_id'];?> <?php if ($row3['page_id'] == $row['page_id']) {echo 'selected'; $connection_type = $row3['connection_type'];}?> ><?php echo $row3['page_name']; ?></option>
+                                      <?php
+                                        }
+                                      ?>  
                                   </select>
                                 </td>
                                 <td>
-                                  <?php 
-                                    switch ($row['connection_type']) {
-                                      case 'image':
-                                        echo "Hình ảnh";
-                                        break;
-                                      case 'local_account':
-                                        echo "Tài khoản";
-                                        break;
-                                      case 'sms':
-                                        echo "SMS";
-                                        break;
-                                      case 'survey':
-                                        echo "Khảo sát";
-                                        break;
-                                      case 'social':
-                                        echo "Mạng xã hội";
-                                        break;
-                                      case 'video':
-                                        echo "Video";
-                                        break;
-                                      default:
-                                        echo "unknown";
-                                        break;
-                                    }
-                                  ?> 
-                                </td>
-                                <td>
-                                  <input type="hidden" name="gwgroup_id" value=<?php echo $row['gwgroup_id']?>>
-                                  <input type="submit" class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" name="submit" value="Sửa" id="edit_<?php echo$row['gwgroup_id'];?>" style="display:none;">
-                                  <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-primary g-bg-primary g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="?submit=Xóa&gwgroup_id=<?php echo $row['gwgroup_id'];?>">Xóa</a>
-                                </td>
-                              
-                              </tr>
-                              </form>
+                                <?php                                   
+                                  switch ($connection_type) {
+                                    case 'image':
+                                      echo "Hình ảnh";
+                                      break;
+                                    case 'local_account':
+                                      echo "Tài khoản";
+                                      break;
+                                    case 'sms':
+                                      echo "SMS";
+                                      break;
+                                    case 'survey':
+                                      echo "Khảo sát";
+                                      break;
+                                    case 'social':
+                                      echo "Mạng xã hội";
+                                      break;
+                                    case 'video':
+                                      echo "Video";
+                                      break;
+                                    default:
+                                      echo "Không rõ";
+                                      break;
+                                  }
+                                ?> 
+                              </td>
+                              <td>
+                                <input type="hidden" name="gwgroup_id" value=<?php echo $row['gwgroup_id']?>>
+                                <input type="submit" class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" name="submit" value="Sửa" id="edit_<?php echo$row['gwgroup_id'];?>" style="display:none;">
+                                <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-primary g-bg-primary g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="?submit=Xóa&gwgroup_id=<?php echo $row['gwgroup_id'];?>">Xóa</a>
+                              </td>
+                                
+                            </tr>
+                          </form>
                   <?php     
-                            }                       
-                          }
-                        } else {
-                          echo "<span style='color:red'>Không có Nhóm</span>";
-                        }
+                        }                       
+                      }
+                    } else {
+                      echo "<span style='color:red'>Không có Nhóm</span>";
+                    }
                   ?>
                 </tbody>
               </table>

@@ -128,6 +128,9 @@ and open the template in the editor.
                     case 'image':
                         $redirect_url = "image.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
                         break;
+                    case 'video':
+                        $redirect_url = "video.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
+                        break;
                     case 'local_account':
                         $redirect_url = "local_account.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
                         break;
@@ -146,6 +149,9 @@ and open the template in the editor.
         switch ($connection_type) {
             case 'image':
                 $redirect_url = "image.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
+                break;
+            case 'video':
+                $redirect_url = "video.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
                 break;
             case 'local_account':
                 $redirect_url = "local_account.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;

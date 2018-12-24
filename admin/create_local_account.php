@@ -164,7 +164,7 @@
 
                         <div class="col-xs-12 col-sm-6 mb-4 form-group" >
                           <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Số thiết bị tối đa:</label>
-                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="device_limit" value=0>
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="number"  name="device_limit" min="0" value="0">
                           <small class = "form-control-feedback">0: Không giới hạn</small>
                         </div>
                       </div>

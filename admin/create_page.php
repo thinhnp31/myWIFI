@@ -35,22 +35,25 @@
     $uploadOk = 0;
     if (isset($_POST['submit'])) {
       //HANDLE FILE UPLOAD
-      //Check background type :
-      $background_extension = strtolower(pathinfo($_FILES["background"]["name"],PATHINFO_EXTENSION));
-      $check = getimagesize($_FILES["background"]["tmp_name"]);
-      if($check !== false) {
-        $uploadOk = 1;
-      } else {
-        $msg .= "Background không phải là file ảnh <br>";
-        $uploadOk = 0;
+      if ($_FILES["background"]["size"] > 0) {
+        //Check background type :      
+        $background_extension = strtolower(pathinfo($_FILES["background"]["name"],PATHINFO_EXTENSION));
+        $check = getimagesize($_FILES["background"]["tmp_name"]);
+        if($check !== false) {
+          $uploadOk = 1;
+        } else {
+          $msg .= "Background không phải là file ảnh <br>";
+          $uploadOk = 0;
+        }
+        //Check backround size 
+        if ($_FILES["background"]["size"] > 5000000) {
+          $msg .= "Background có kích thước quá lớn. Vui lòng chọn ảnh <= 5MB";
+          $uploadOk = 0;
+        } else {
+          $uploadOk = 1;
+        }
       }
-      //Check backround size 
-      if ($_FILES["background"]["size"] > 5000000) {
-        $msg .= "Background có kích thước quá lớn. Vui lòng chọn ảnh <= 5MB";
-        $uploadOk = 0;
-      } else {
-        $uploadOk = 1;
-      }
+      
       //Check logo type :
       $logo_extension = strtolower(pathinfo($_FILES["logo"]["name"],PATHINFO_EXTENSION));
       $check = getimagesize($_FILES["logo"]["tmp_name"]);
@@ -60,9 +63,9 @@
         $msg .= "Logo không phải là file ảnh <br>";
         $uploadOk = 0;
       }
-      //Check backround size 
+      //Check logo size 
       if ($_FILES["logo"]["size"] > 500000) {
-        $msg .= "Logo có kích thước quá lớn";
+        $msg .= "Logo có kích thước quá lớn. Vui lòng chọn ảnh <= 5MB";
         $uploadOk = 0;
       } else {
         $uploadOk = 1;
@@ -70,24 +73,52 @@
 
       if ($uploadOk == 1) {
         //Upload file
-        $target_background = "../images/background/" . uniqid() . '.' . $background_extension;
-        while (file_exists($target_background)) {
+        if ($_FILES["background"]["size"] > 0) {
           $target_background = "../images/background/" . uniqid() . '.' . $background_extension;
+          while (file_exists($target_background)) {
+            $target_background = "../images/background/" . uniqid() . '.' . $background_extension;
+          }
+
+          $background_status = move_uploaded_file($_FILES["background"]["tmp_name"], $target_background);
+        } else {
+          $background_status = true;
         }
+
         $target_logo = "../images/logo/" . uniqid() . '.' . $logo_extension;
         while (file_exists($target_logo)) {
           $target_logo = "../images/logo/" . uniqid() . '.' . $logo_extension;
         }
-        $background_status = move_uploaded_file($_FILES["background"]["tmp_name"], $target_background);
+        
         $logo_status = move_uploaded_file($_FILES["logo"]["tmp_name"], $target_logo);
+
         if ($background_status && $logo_status) {
           //If success Uploading FILES
           $page_name = $_POST['page_name'];
           $connection_type = $_POST['connection_type'];          
           $profile_id = $_POST['profile_id'];
           $welcome = $_POST['welcome'];
+          $ad_url = $_POST['ad_url'];
           $background_name = basename($target_background);
           $logo_name = basename($target_logo);
+
+          if (isset($_POST['youtube_link'])) {
+            $youtube_link = $_POST['youtube_link'];            
+          } else {
+            $youtube_link = '';
+          }
+
+          if (isset($_POST['countdown'])) {
+            $countdown = $_POST['countdown'];
+          } else {
+            $countdown = 0;
+          }
+
+          if (isset($_POST['survey_name'])) {
+            $survey_name = $_POST['survey_name'];
+          } else {
+            $survey_name = 0;
+          }
+
 
           //check duplicate page name
           $stmt = $conn->prepare("SELECT * FROM pages WHERE page_name = ?");
@@ -99,8 +130,8 @@
             $type = "danger";
           } else {
             //create page
-            $stmt = $conn->prepare("INSERT INTO pages (page_name, background, logo, connection_type, profile_id, welcome) VALUES (?,?,?,?,?,?) ");            
-            $stmt->bind_param('ssssis', $page_name, $background_name, $logo_name, $connection_type, $profile_id, $welcome);
+            $stmt = $conn->prepare("INSERT INTO pages (page_name, background, logo, connection_type, profile_id, welcome, ad_url, youtube_link, countdown, survey_name) VALUES (?,?,?,?,?,?,?,?,?,?) ");          
+            $stmt->bind_param('ssssisssis', $page_name, $background_name, $logo_name, $connection_type, $profile_id, $welcome, $ad_url, $youtube_link, $countdown, $survey_name);
             $stmt->execute();
             $msg = "Tạo trang thành công";
             $type = "success";
@@ -206,7 +237,7 @@
                     </div>
 
                     <div class="row">
-                      <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                      <div class="col-xs-12 col-sm-6 mb-4 form-group" id="background_holder">
                         <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Hình nền:</label>
                         <input type="file" required name="background" id = "background" accept="image/*" onchange="readURLBackground(this)">
                         <img id="previewBackgroundHolder" width="80%">
@@ -221,15 +252,33 @@
                       
                     <div class="mb-4" >
                       <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Hình thức:</label>
-                      <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="connection_type" required id="connection_type" oninput="display_guide();">
+                      <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="connection_type" required id="connection_type" onchange="display_guide();">
                         <option value="image">Hình ảnh</option>
                         <option value="video">Video</option>
                         <option value="local_account">Tài Khoản</option>
+                        <option value="survey">Khảo sát</option>
+                        <!-- 
                         <option value="sms">SMS</option>
                         <option value="social">Mạng xã hội</option>
-                        <option value="survey">Khảo sát</option>
+                        
                         <option value="voucher">Voucher</option>
+                        -->
                       </select>                           
+                    </div>
+
+                    <div class="mb-4" id="youtube_link">
+                      <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Link Youtube: </label>
+                      <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" id="youtube_link_input" name="youtube_link">
+                    </div>
+
+                    <div class="mb-4" id="countdown">
+                      <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">CountDown : </label>
+                      <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" name="countdown" type="number" min="1" id="countdown_input">
+                    </div>
+
+                    <div class="mb-4">
+                      <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Trang quảng cáo : </label>
+                      <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" name="ad_url">
                     </div>
 
                     <div class="mb-4">
@@ -243,6 +292,25 @@
                             if ($row['profile_name'] != '') {
                         ?>
                               <option value=<?php echo $row['profile_id'];?>><?php echo $row['profile_name']; ?></option>
+                        <?php
+                            }
+                          }
+                        ?>                          
+                      </select>                      
+                    </div>
+
+                    <div class="mb-4" id="survey_holder">
+                      <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Khảo sát : </label>
+                      <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="survey_name" id="survey_input">
+                        <option></option>
+                        <?php
+                          $stmt = $conn->prepare("SELECT * FROM surveys");
+                          $stmt->execute();
+                          $result = $stmt->get_result();
+                          while($row = $result->fetch_assoc()) {
+                            if ($row['survey_name'] != '') {
+                        ?>
+                              <option value=<?php echo $row['survey_name'];?>><?php echo $row['survey_name']; ?></option>
                         <?php
                             }
                           }
@@ -438,44 +506,62 @@
         case "image":
           $("#guide_pc").load("includes/guide/image.html");
           $("#guide_mobile").load("includes/guide/image.html");
-          document.getElementById("ad_url").style.display="block";
-          document.getElementById("ad_url_container").style.display="block";
+          $("#youtube_link").hide();
+          $("#countdown").hide();
+          $("#youtube_link_input").attr("required", false);
+          $("#countdown_input").attr("required", false);
+          $("#background").attr("required", true);
+          $("#background_holder").show();
+          $("#survey_holder").hide();
+          $("#survey_holder").attr("required", false);
           break;
         case "video":
-          document.getElementById("guide_pc").src="includes/images/video_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/video_mobile.png";
-          document.getElementById("ad_url").style.display="block";
-          document.getElementById("ad_url_container").style.display="block";
+          $("#guide_pc").load("includes/guide/video.html");
+          $("#guide_mobile").load("includes/guide/video.html");
+          $("#youtube_link").show();          
+          $("#countdown").show();
+          $("#youtube_link_input").attr("required", true);
+          $("#countdown_input").attr("required", true);
+          $("#background").attr("required", false);
+          $("#background_holder").hide();
+          $("#survey_holder").hide();
+          $("#survey_input").attr("required", false);
           break;
         case "local_account":
-          document.getElementById("guide_pc").src="includes/images/local_account_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/local_account_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/local_account.html");
+          $("#guide_mobile").load("includes/guide/local_account.html");
+          $("#youtube_link").hide();
+          $("#countdown").hide();
+          $("#youtube_link_input").attr("required", false);
+          $("#countdown_input").attr("required", false);
+          $("#background").attr("required", true);
+          $("#background_holder").show();
+          $("#survey_holder").hide();
+          $("#survey_input").attr("required", false);
           break;
         case "sms":
-          document.getElementById("guide_pc").src="includes/images/sms_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/sms_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/sms.html");
+          $("#guide_mobile").load("includes/guide/sms.html");
           break;
         case "social":
-          document.getElementById("guide_pc").src="includes/images/social_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/social_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/social.html");
+          $("#guide_mobile").load("includes/guide/social.html");
           break;
         case "survey":
-          document.getElementById("guide_pc").src="includes/images/survey_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/survey_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/survey.html");
+          $("#guide_mobile").load("includes/guide/survey.html");
+          $("#youtube_link").hide();
+          $("#countdown").hide();
+          $("#youtube_link_input").attr("required", false);
+          $("#countdown_input").attr("required", false);
+          $("#background").attr("required", true);
+          $("#background_holder").show();
+          $("#survey_holder").show();
+          $("#survey_input").attr("required", true);
           break;
         case "voucher":
-          document.getElementById("guide_pc").src="includes/images/voucher_pc.png";
-          document.getElementById("guide_mobile").src="includes/images/voucher_mobile.png";
-          document.getElementById("ad_url").style.display="none";
-          document.getElementById("ad_url_container").style.display="none";
+          $("#guide_pc").load("includes/guide/voucher.html");
+          $("#guide_mobile").load("includes/guide/voucher.html");
           break;
         default:
           break;

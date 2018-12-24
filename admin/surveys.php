@@ -29,6 +29,26 @@
     }
 
     if (!$logged_in) header("Location: " . mywifi_admin . "login.php");
+
+    if (isset($_POST['submit'])) {
+      if ($_POST['submit'] == "Xóa") {
+        $survey_name = $_POST['survey_name'];
+        $stmt = $conn->prepare("DELETE FROM surveys WHERE survey_name = ?");
+        $stmt->bind_param("s", $survey_name);
+        $stmt->execute();
+
+        $stmt = $conn->prepare("DELETE FROM questions WHERE survey_name = ?");
+        $stmt->bind_param("s", $survey_name);
+        $stmt->execute();
+
+        $stmt = $conn->prepare("UPDATE pages set survey_name = NULL WHERE survey_name = ?");
+        $stmt->bind_param("s", $survey_name);
+        $stmt->execute();
+
+        $msg = "Xóa khảo sát thành công";
+        $type = "success";
+      }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -91,12 +111,14 @@
 	      	<div class="col g-ml-45 g-ml-0--lg g-pb-65--md">
 	      		<!-- MAIN CODE -->
             <div class="g-pa-20">
-               <!-- Notification Area -->
+              <!-- Notification Area -->
               <?php
-                if (isset($_GET['msg']))
-                  $msg = $_GET['msg'];
-                if (isset($_GET['type']))
-                  $type = $_GET['type'];
+                if (isset($_POST['msg'])) {
+                  $msg = $_POST['msg'];
+                }
+                if (isset($_POST['type'])) {
+                  $type = $_POST['type'];
+                }
                 if (isset($msg) && isset($type)) {
               ?>
                   <div class="alert alert-<?php echo $type; ?>" role="alert">
@@ -105,126 +127,83 @@
               <?php
                 }
               ?>
-              <h1 class="g-font-weight-300 g-font-size-28 g-color-black g-mb-30">Danh sách tài khoản</h1>
+              <h1 class="g-font-weight-300 g-font-size-28 g-color-black g-mb-30">Quản lý khảo sát</h1>
 
               <div class="media-md align-items-center g-mb-30">
                 <div class="d-flex g-mb-15 g-mb-0--md">
-                  <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="create_local_account.php">Tạo mới</a>
+                  <a class="u-tags-v1 text-center g-width-130 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="create_survey.php">Thêm khảo sát</a>
                 </div>
+                
                 <div class="media d-md-flex align-items-center ml-auto">
-                  <form method="GET" action="#">
+                  <form method="POST" action="#">
                     <div class="input-group g-pos-rel g-width-320--md">                  
-                      <input class="form-control g-font-size-default g-brd-gray-light-v7 g-brd-lightblue-v3--focus g-rounded-20 g-pl-20 g-pr-50 g-py-10" type="text" placeholder="username" name="username">
+                      <input class="form-control g-font-size-default g-brd-gray-light-v7 g-brd-lightblue-v3--focus g-rounded-20 g-pl-20 g-pr-50 g-py-10" type="text" placeholder="Tên khảo sát" name="survey_name">
                       <button class="btn g-pos-abs g-top-0 g-right-0 g-z-index-2 g-width-60 h-100 g-bg-transparent g-font-size-16 g-color-primary g-color-secondary--hover rounded-0" type="submit">
                         <i class="hs-admin-search g-absolute-centered"></i>
-                      </button>                  
+                      </button>                     
                     </div>
                   </form>
                 </div>
-              </div>
-
-              <div class="media-md align-items-center g-mb-30">
-                <div class="d-flex g-mb-15 g-mb-0--md">
-                  <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" onclick="$('#file_upload_form').toggle()">Import</a>
-                </div>
-              </div>
-
-              <div style="display: none" id="file_upload_form" >
-                <form  method="POST" action="handle_csv_upload.php" enctype="multipart/form-data">
-                    <div class="form-group row">
-                      <div class="col-8">
-                        <div class="custom-file">
-                          <input class="custom-file-input" type="file" name="fileToUpload" for="fileToUpload" id="fileToUpload" required="">
-                          <label class="custom-file-label" id="fileToUploadName">Vui lòng chọn file csv...</label>
-                        </div>
-                      </div>
-                      <div class="col-2">
-                        
-                        <input type="number" class="form-control" name="device_limit" placeholder="Số thiết bị" min="0" required="">
-                      </div>
-                      <div class="col-2">
-                        <input class="form-control" type="submit" name="submit" value="Upload">
-                    </div>
-                    </div>
-                </form>
               </div>
 
               <div class="table-responsive g-mb-40">
                 <table class="table u-table--v3 g-color-black">
                   <thead>
                     <tr>
-                      <th>Tên đăng nhập</th>
-                      <th>Họ và tên</th>
-                      <th>Số thiết bị</th>
-                      <th>Ngày hết hạn</th>
-                      <th>Lần đăng nhập cuối</th>
-                      <th>Trạng thái</th>
+                      <th>Tên khảo sát</th>
+                      <th>Trang chào</th>
                       <th>Hành động</th>
                     </tr>
                 </thead>
 
-                <tbody>
+                <tbody>                  
                   <?php
-                    if (isset($_GET['username'])) {
-                      $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
-                      $stmt->bind_param('s', $_GET['username']);
+                    if (isset($_POST['survey_name']) && ($_POST['survey_name'] != '')) {
+                      $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_name = ? ");
+                      $stmt->bind_param('s', $_POST['survey_name']);
                     } else {
-                      $stmt = $conn->prepare("SELECT * FROM users "); 
+                      $stmt = $conn->prepare("SELECT * FROM surveys "); 
                     }
                     $stmt->execute();
                     $result = $stmt->get_result();      
-                        if ($result->num_rows > 0) { 
-                          while ($row = $result->fetch_assoc()) {
-                            $stmt = $conn->prepare("SELECT * FROM sessions WHERE username = ? ORDER BY time DESC");
-                            $stmt->bind_param('s', $row['username']);
-                            $stmt->execute();
-                            $result2 = $stmt->get_result();
-                            $device = $result2->num_rows;
-                            $row2 = $result2->fetch_assoc();
-                            $last_time = $row2['time'];
+                    if ($result->num_rows > 0) { 
+                      while ($row = $result->fetch_assoc()) {
+                        if ($row['survey_name'] != '') {
+                          
                   ?>
-                            <tr>
-                              <td><?php echo $row['username']; ?></td>
-                              <td><?php echo $row['fullname']; ?></td>
+                          <form method="POST" action="#">
+                            <tr>                                
                               <td>
-                                <?php 
-                                if ($row['device_limit'] > 0) {
-                                  echo $device . "/" . $row['device_limit']; 
-                                } else {
-                                  echo $device . "/ - ";
-                                }
-                                
-                                ?>
-                                  
+                                <?php echo $row['survey_name'];?>
                               </td>
-                              <td><?php echo $row['expiry_date']; ?></td>
-                                <td><?php echo $last_time; ?></td>
                               <td>
-                                <?php 
-                                  switch ($row['user_status']) {
-                                    case 'active':
-                                      echo "<span style='color:green'>Active</span>";
-                                      break;
-                                    case 'expired':
-                                      echo "<span style='color:red'>Hết hạn</span>";
-                                      break;
-                                    default:
-                                      echo "<span style='color:black'>Unknown</span>";
-                                      break;
+                                <?php
+                                  $stmt2 = $conn->prepare("SELECT * FROM pages WHERE connection_type = ? AND survey_name = ?");
+                                  $connection_type = "survey";
+                                  $stmt2->bind_param("ss", $connection_type, $row['survey_name']);
+                                  $stmt2->execute();
+                                  $result2 = $stmt2->get_result();
+                                  if ($result2->num_rows > 0) {
+                                    $row2 = $result2->fetch_assoc();
+                                    echo $row2['page_name'];
                                   }
                                 ?>
                               </td>
-                              <td> 
-                                <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="local_account_detail.php?user_id=<?php echo $row['user_id'];?>">Chi tiết</a>
-                                <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-primary g-bg-primary g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="delete_local_account.php?user_id=<?php echo $row['user_id'];?>">Xóa</a>
+                              <td>
+                                <input type="hidden" name="survey_name" value=<?php echo $row['survey_name']?>>
+                                <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="survey_detail.php?submit=Sửa&survey_name=<?php echo $row['survey_name'];?>">Sửa</a>
+                                <input type="submit" class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-primary g-bg-primary g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" name="submit" value="Xóa">
+                                
                               </td>
+                                
                             </tr>
-
-                  <?php
-                          }
-                        } else {
-                          echo "<span style='color:red'>Không có tài khoản</span>";
-                        }
+                          </form>
+                  <?php     
+                        }                       
+                      }
+                    } else {
+                      echo "<span style='color:red'>Không có khảo sát</span>";
+                    }
                   ?>
                 </tbody>
               </table>
@@ -353,15 +332,6 @@
     	});
   	</script>
 
-    <!-- Display file name when uploading -->
-    <script> 
-      $('#fileToUpload').change(function() {
-        var file_path = $('#fileToUpload').val();
-        var file_name = file_path.split('\\').pop();
-        $('#fileToUploadName').html(file_name);
-      });
-
-    </script>
 </body>
 
 </html>

@@ -54,6 +54,9 @@ and open the template in the editor.
     $connection_type = $row['connection_type'];
     $welcome = $row['welcome'];
     $profile_id = $row['profile_id'];
+    $ad_url  = $row['ad_url'];
+    if ($ad_url != "") 
+        $url = $ad_url;
     
     if (isset($_GET['submit'])) { //IF user click submit        
         //Get username and password
