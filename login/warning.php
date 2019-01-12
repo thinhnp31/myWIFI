@@ -15,13 +15,13 @@
     if ($diff < 0) 
       $diff = 0;
 
-    $incoming = $row['incoming'];
-    $outgoing = $row['outgoing'];
+    $used_incoming = $row['used_incoming'];
+    $used_outgoing = $row['used_outgoing'];
     $capacity = $row['capacity'];
-    if ($incoming > $outgoing) 
-      $remain = $capacity - $incoming;
+    if ($used_incoming > $used_outgoing) 
+      $remain = $capacity - $used_incoming;
     else       
-      $remain = $capacity - $outgoing;
+      $remain = $capacity - $used_outgoing;
     if ($remain < 0) 
       $remain = 0;
 ?>

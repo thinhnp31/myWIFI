@@ -45,13 +45,13 @@
                 $row = $result->fetch_assoc();
                 $capacity = $row['capacity'];
 
-                $incoming = $_GET['incoming'];
-                $outgoing = $_GET['outgoing'];
+                $used_incoming = $_GET['incoming'] / (1024*1024);
+                $used_outgoing = $_GET['outgoing'] / (1024*1024);
 
 
                 //Update sessions
-                $stmt = $conn->prepare("UPDATE sessions SET incoming = incoming + ?, outgoing = outgoing + ? WHERE mac = ?");
-                $stmt->bind_param("iis", $incoming, $outgoing, $mac);
+                $stmt = $conn->prepare("UPDATE sessions SET used_incoming = used_incoming + ?, used_outgoing = used_outgoing + ? WHERE mac = ?");
+                $stmt->bind_param("iis", $used_incoming, $used_outgoing, $mac);
                 $stmt->execute();
                 $auth_response = "Auth: 1";            
             } else {
@@ -83,12 +83,13 @@
                 }
 
                 //Check capacity
-                $incoming = $row['incoming'];
-                $outgoing = $row['outgoing'];
+
+                $used_incoming = $row['used_incoming'];
+                $used_outgoing = $row['used_outgoing'];
 
                 $capacity = $row['capacity'];
 
-                if (($incoming > $capacity) || ($outgoing > $capacity)) {
+                if (($used_incoming > $capacity) || ($used_outgoing > $capacity)) {
                     $out_of_capacity = 1;
                 } else {
                     $out_of_capacity = 0;
@@ -133,18 +134,27 @@
                 $row = $result->fetch_assoc();
                 $capacity = $row['capacity'];
 
-                $incoming = $row['incoming'];
-                $outgoing = $row['outgoing'];
-                $ok = 1;
+                if ($row['gw_sn'] == $gw_sn) {
+                  $last_incoming = round($_GET['incoming'] / (1024*1024));
+                  $used_incoming = $row['used_incoming'] + $last_incoming - $row['last_incoming'];
+                  $last_outgoing = round($_GET['outgoing'] / (1024*1024));
+                  $used_outgoing = $row['used_outgoing'] + $last_outgoing - $row['last_outgoing'];
+                  $stmt = $conn->prepare("UPDATE sessions SET last_incoming = ?, used_incoming = ?, last_outgoing =  ?, used_outgoing = ? WHERE mac = ?");
+                  $stmt->bind_param("iiiis", $last_incoming, $used_incoming, $last_outgoing, $used_outgoing, $mac);
+                  $stmt->execute();
+                } else {
+                  $last_incoming = round($_GET['incoming'] / (1024*1024));
+                  $used_incoming = $row['used_incoming'];
+                  $last_outgoing = round($_GET['outgoing'] / (1024*1024));
+                  $used_outgoing = $row['used_outgoing'];
+                  $stmt = $conn->prepare("UPDATE sessions SET last_incoming = ?, used_incoming = ?, last_outgoing =  ?, used_outgoing = ?, gw_sn = ? WHERE mac = ?");
+                  $stmt->bind_param("iiiis", $last_incoming, $used_incoming, $last_outgoing, $used_outgoing, $gw_sn, $mac);
+                  $stmt->execute();
+                }
+                
+                $ok = 1;             
 
-                $incoming .= round($_GET['incoming'] / (1024*1024));
-                $outgoing .= round($_GET['outgoing'] / (1024*1024));
-
-                $stmt = $conn->prepare("UPDATE sessions SET incoming = ?, outgoing =  ? WHERE mac = ?");
-                $stmt->bind_param("iis", $incoming, $outgoing, $mac);
-                $stmt->execute();
-
-                if (($capacity < $incoming) || ($capacity < $outgoing)) 
+                if (($capacity < $used_incoming) || ($capacity < $used_outgoing)) 
                     $ok = 0;
                 if ($capacity == 0) {
                     $ok = 1;

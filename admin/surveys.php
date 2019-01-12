@@ -158,9 +158,9 @@
 
                 <tbody>                  
                   <?php
-                    if (isset($_POST['survey_name']) && ($_POST['survey_name'] != '')) {
-                      $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_name = ? ");
-                      $stmt->bind_param('s', $_POST['survey_name']);
+                    if (isset($_POST['survey_id']) && ($_POST['survey_id'] != '')) {
+                      $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_id = ? ");
+                      $stmt->bind_param('s', $_POST['survey_id']);
                     } else {
                       $stmt = $conn->prepare("SELECT * FROM surveys "); 
                     }
@@ -168,19 +168,19 @@
                     $result = $stmt->get_result();      
                     if ($result->num_rows > 0) { 
                       while ($row = $result->fetch_assoc()) {
-                        if ($row['survey_name'] != '') {
+                        if ($row['survey_id'] != '') {
                           
                   ?>
                           <form method="POST" action="#">
                             <tr>                                
                               <td>
-                                <?php echo $row['survey_name'];?>
+                                <?php echo $row['survey_id'];?>
                               </td>
                               <td>
                                 <?php
-                                  $stmt2 = $conn->prepare("SELECT * FROM pages WHERE connection_type = ? AND survey_name = ?");
+                                  $stmt2 = $conn->prepare("SELECT * FROM pages WHERE connection_type = ? AND survey_id = ?");
                                   $connection_type = "survey";
-                                  $stmt2->bind_param("ss", $connection_type, $row['survey_name']);
+                                  $stmt2->bind_param("ss", $connection_type, $row['survey_id']);
                                   $stmt2->execute();
                                   $result2 = $stmt2->get_result();
                                   if ($result2->num_rows > 0) {
@@ -190,8 +190,8 @@
                                 ?>
                               </td>
                               <td>
-                                <input type="hidden" name="survey_name" value=<?php echo $row['survey_name']?>>
-                                <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="survey_detail.php?submit=Sửa&survey_name=<?php echo $row['survey_name'];?>">Sửa</a>
+                                <input type="hidden" name="survey_id" value=<?php echo $row['survey_id']?>>
+                                <a class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-teal-v2 g-bg-teal-v2 g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" href="survey_detail.php?submit=Sửa&survey_id=<?php echo $row['survey_id'];?>">Sửa</a>
                                 <input type="submit" class="u-tags-v1 text-center g-width-100 g-brd-around g-brd-primary g-bg-primary g-font-weight-400 g-color-white g-rounded-50 g-py-4 g-px-15" name="submit" value="Xóa">
                                 
                               </td>

@@ -1,153 +1,238 @@
-<!-- set bodyTheme = "u-card-v1" -->
 <?php 
-    include "includes/defines.php";  
-    include 'includes/db_connect.php'; 
+include "includes/defines.php";  
+include 'includes/db_connect.php'; 
 
-    //Check if this client has been logged in or not
-    $logged_in = false;
-
-  
-    if (isset($_SESSION['email'])) { //if this client still has a session
-        // redirect to MAIN PAGE
-        $logged_in = true;
-    } else {
-        if (isset($_COOKIE['email'])) { //if this client has cookie, 
-        //may be I can remember him (or her)
-        $token = $_COOKIE['email'] + $_SERVER['REMOTE_ADDR'];
-        $token = hash_hmac('md5', $token , salt);
-        $stmt = $conn->prepare("SELECT * FROM remember WHERE token = ?");
-        $stmt->bind_param('s', $token); 
-        $stmt->execute();
-        $result = $stmt->get_result();      
-            if ($result->num_rows > 0) { //if his token exists in database
-                //I  can remember him
-                $_SESSION['email'] = $_COOKIE['email'];
-                $_SESSION['fullname'] = $_COOKIE['fullname'];
-                $logged_in = true;
-            } 
-        }
-    }
-
-    if (!$logged_in) header("Location: " . mywifi_admin . "login.php");
-
-    $msg = "";
-    $type = "";
-    if (isset($_POST['submit'])) {
-      $survey_name = $_POST['survey_name'];
-      $question1 = $_POST['question1'];
-      $question1_type = $_POST['question1_type'];
-      if (isset($_POST['answer11']))
-        $answer11 = $_POST['answer11'];
-      else 
-        $answer11 = "";
-      if (isset($_POST['answer12']))
-        $answer12 = $_POST['answer12'];
-      else 
-        $answer12 = "";
-      if (isset($_POST['answer13']))
-        $answer13 = $_POST['answer13'];
-      else 
-        $answer13 = "";
-      if (isset($_POST['answer14']))
-        $answer14 = $_POST['answer14'];
-      else 
-        $answer14 = "";
-      if (isset($_POST['answer15']))
-        $answer15 = $_POST['answer15'];
-      else 
-        $answer15 = "";
-      
-      if (isset($_POST['question2']))
-        $question2 = $_POST['question2'];
-      else 
-        $question2 = "";
-      if (isset($_POST['question2_type'])) 
-        $question2_type = $_POST['question2_type'];
-      else 
-        $question2_type = "";
-      if (isset($_POST['answer21']))
-        $answer21 = $_POST['answer21'];
-      else 
-        $answer21 = "";
-      if (isset($_POST['answer22']))
-        $answer22 = $_POST['answer22'];
-      else 
-        $answer22 = "";
-      if (isset($_POST['answer23']))
-        $answer23 = $_POST['answer23'];
-      else 
-        $answer23 = ""; 
-      if (isset($_POST['answer24']))
-        $answer24 = $_POST['answer24'];
-      else 
-        $answer24 = "";
-      if (isset($_POST['answer25']))
-        $answer25 = $_POST['answer25'];
-      else 
-        $answer25 = "";
-
-      if (isset($_POST['question3']))
-        $question3 = $_POST['question3'];
-      else 
-        $question3 = "";
-      if (isset($_POST['question3_type'])) 
-        $question3_type = $_POST['question3_type'];
-      else 
-        $question3_type = "";
-      if (isset($_POST['answer31']))
-        $answer31 = $_POST['answer31'];
-      else 
-        $answer31 = "";
-      if (isset($_POST['answer32']))
-        $answer32 = $_POST['answer32'];
-      else 
-        $answer32 = "";
-      if (isset($_POST['answer33']))
-        $answer33 = $_POST['answer33'];
-      else 
-        $answer33 = ""; 
-      if (isset($_POST['answer34']))
-        $answer34 = $_POST['answer34'];
-      else 
-        $answer34 = ""; 
-      if (isset($_POST['answer35']))
-        $answer35 = $_POST['answer35'];
-      else 
-        $answer35 = "";
+//Check if this client has been logged in or not
+$logged_in = false;
 
 
-      $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_name = ?");
-      $stmt->bind_param("s", $survey_name);
+if (isset($_SESSION['email'])) { //if this client still has a session
+  // redirect to MAIN PAGE
+  $logged_in = true;
+} else {
+  if (isset($_COOKIE['email'])) { //if this client has cookie, 
+    //may be I can remember him (or her)
+    $token = $_COOKIE['email'] + $_SERVER['REMOTE_ADDR'];
+    $token = hash_hmac('md5', $token , salt);
+    $stmt = $conn->prepare("SELECT * FROM remember WHERE token = ?");
+    $stmt->bind_param('s', $token); 
+    $stmt->execute();
+    $result = $stmt->get_result();      
+    if ($result->num_rows > 0) { //if his token exists in database
+      //I  can remember him
+      $_SESSION['email'] = $_COOKIE['email'];
+      $_SESSION['fullname'] = $_COOKIE['fullname'];
+      $logged_in = true;
+    } 
+  }
+}
+
+if (!$logged_in) header("Location: " . mywifi_admin . "login.php");
+
+$msg = "";
+$type = "";
+if (isset($_POST['submit'])) {
+  //Collect parameters
+  $survey_name = $_POST['survey_name'];
+  $question1 = $_POST['question1'];
+  $question1_type = $_POST['question1_type'];
+
+  //Question 1
+  if (isset($_POST['answer11']))
+    $answer11 = $_POST['answer11'];
+  else 
+    $answer11 = "";
+  if (isset($_POST['answer12']))
+    $answer12 = $_POST['answer12'];
+  else 
+    $answer12 = "";
+  if (isset($_POST['answer13']))
+    $answer13 = $_POST['answer13'];
+  else 
+    $answer13 = "";
+  if (isset($_POST['answer14']))
+    $answer14 = $_POST['answer14'];
+  else 
+    $answer14 = "";
+  if (isset($_POST['answer15']))
+    $answer15 = $_POST['answer15'];
+  else 
+    $answer15 = "";
+
+  //Question 2      
+  if (isset($_POST['question2']))
+    $question2 = $_POST['question2'];
+  else 
+    $question2 = "";
+  if (isset($_POST['question2_type'])) 
+    $question2_type = $_POST['question2_type'];
+  else 
+    $question2_type = "";
+  if (isset($_POST['answer21']))
+    $answer21 = $_POST['answer21'];
+  else 
+    $answer21 = "";
+  if (isset($_POST['answer22']))
+    $answer22 = $_POST['answer22'];
+  else 
+    $answer22 = "";
+  if (isset($_POST['answer23']))
+    $answer23 = $_POST['answer23'];
+  else 
+    $answer23 = ""; 
+  if (isset($_POST['answer24']))
+    $answer24 = $_POST['answer24'];
+  else 
+    $answer24 = "";
+  if (isset($_POST['answer25']))
+    $answer25 = $_POST['answer25'];
+  else 
+    $answer25 = "";
+
+  //Question 3
+  if (isset($_POST['question3']))
+    $question3 = $_POST['question3'];
+  else 
+    $question3 = "";
+  if (isset($_POST['question3_type'])) 
+    $question3_type = $_POST['question3_type'];
+  else 
+    $question3_type = "";
+  if (isset($_POST['answer31']))
+    $answer31 = $_POST['answer31'];
+  else 
+    $answer31 = "";
+  if (isset($_POST['answer32']))
+    $answer32 = $_POST['answer32'];
+  else 
+    $answer32 = "";
+  if (isset($_POST['answer33']))
+    $answer33 = $_POST['answer33'];
+  else 
+    $answer33 = ""; 
+  if (isset($_POST['answer34']))
+    $answer34 = $_POST['answer34'];
+  else 
+    $answer34 = ""; 
+  if (isset($_POST['answer35']))
+    $answer35 = $_POST['answer35'];
+  else 
+    $answer35 = "";
+
+  //Question 4
+  if (isset($_POST['question4']))
+    $question4 = $_POST['question4'];
+  else 
+    $question4 = "";
+  if (isset($_POST['question4_type'])) 
+    $question4_type = $_POST['question4_type'];
+  else 
+    $question4_type = "";
+  if (isset($_POST['answer41']))
+    $answer41 = $_POST['answer41'];
+  else 
+    $answer41 = "";
+  if (isset($_POST['answer42']))
+    $answer42 = $_POST['answer42'];
+  else 
+    $answer42 = "";
+  if (isset($_POST['answer43']))
+    $answer43 = $_POST['answer43'];
+  else 
+    $answer43 = ""; 
+  if (isset($_POST['answer44']))
+    $answer44 = $_POST['answer44'];
+  else 
+    $answer44 = ""; 
+  if (isset($_POST['answer45']))
+    $answer45 = $_POST['answer45'];
+  else 
+    $answer45 = "";
+
+  //Question 5
+  if (isset($_POST['question5']))
+    $question5 = $_POST['question5'];
+  else 
+    $question5 = "";
+  if (isset($_POST['question5_type'])) 
+    $question5_type = $_POST['question5_type'];
+  else 
+    $question5_type = "";
+  if (isset($_POST['answer51']))
+    $answer51 = $_POST['answer51'];
+  else 
+    $answer51 = "";
+  if (isset($_POST['answer52']))
+    $answer52 = $_POST['answer52'];
+  else 
+    $answer52 = "";
+  if (isset($_POST['answer53']))
+    $answer53 = $_POST['answer53'];
+  else 
+    $answer53 = ""; 
+  if (isset($_POST['answer54']))
+    $answer54 = $_POST['answer54'];
+  else 
+    $answer54 = ""; 
+  if (isset($_POST['answer55']))
+    $answer55 = $_POST['answer55'];
+  else 
+    $answer55 = "";
+
+      //Check Duplicate
+  $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_name = ?");
+  $stmt->bind_param("s", $survey_name);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if ($result->num_rows > 0) {
+    $msg = "Lỗi: tên khảo sát đã tồn tại";
+    $type = "danger";
+  } else {
+        //Create new survey        
+    $stmt = $conn->prepare("INSERT INTO  surveys(survey_name) VALUES(?)");
+    $stmt->bind_param("s", $survey_name);
+    $stmt->execute();
+        //Get survey_id of new survey
+    $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_name = ?");
+    $stmt->bind_param("s", $survey_name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $survey_id = $row['survey_id'];
+
+        //Insert new questions into DB
+    $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+    $stmt->bind_param("ssisssss", $question1, $question1_type, $survey_id, $answer11, $answer12, $answer13, $answer14, $answer15);
+    $stmt->execute();
+
+    if ($question2 != "") {
+      $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+      $stmt->bind_param("ssisssss", $question2, $question2_type, $survey_id, $answer21, $answer22, $answer23, $answer24, $answer25);
       $stmt->execute();
-      $result = $stmt->get_result();
-      if ($result->num_rows > 0) {
-        $msg = "Lỗi: tên khảo sát đã tồn tại";
-        $type = "danger";
-      } else {
-        $stmt = $conn->prepare("INSERT INTO  surveys(survey_name) VALUES(?)");
-        $stmt->bind_param("s", $survey_name);
-        $stmt->execute();
-
-        $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_name, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssssssss", $question1, $question1_type, $survey_name, $answer11, $answer12, $answer13, $answer14, $answer15);
-        $stmt->execute();
-
-        if ($question2 != "") {
-          $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_name, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssssssss", $question2, $question2_type, $survey_name, $answer21, $answer22, $answer23, $answer24, $answer25);
-        $stmt->execute();
-        }
-
-        if ($question3 != "") {
-          $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_name, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssssssss", $question3, $question3_type, $survey_name, $answer31, $answer32, $answer33, $answer34, $answer35);
-        $stmt->execute();
-        }
-
-        $msg = "Tạo khảo sát thành công";
-        $type = "success";
-      }
     }
+
+    if ($question3 != "") {
+      $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+      $stmt->bind_param("ssisssss", $question3, $question3_type, $survey_id, $answer31, $answer32, $answer33, $answer34, $answer35);
+      $stmt->execute();
+    }
+
+    if ($question4 != "") {
+      $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+      $stmt->bind_param("ssisssss", $question4, $question4_type, $survey_id, $answer41, $answer42, $answer43, $answer44, $answer45);
+      $stmt->execute();
+    }
+
+    if ($question5 != "") {
+      $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+      $stmt->bind_param("ssisssss", $question5, $question5_type, $survey_id, $answer51, $answer52, $answer53, $answer54, $answer55);
+      $stmt->execute();
+    }
+
+    $msg = "Tạo khảo sát thành công";
+    $type = "success";
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -240,7 +325,8 @@
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
                     <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question1_type" required id="question1_type" onchange="change_question1_type()">                          
                       <option value="text">Câu hỏi mở</option>
-                      <option value="option">Bình chọn</option>                  
+                      <option value="option">Bình chọn</option>            
+                      <option value="checkbox">Checkbox</option>      
                     </select>
 
                     <!-- Answer container -->
@@ -322,7 +408,8 @@
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
                     <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question2_type" id="question2_type" onchange="change_question2_type()">                          
                       <option value="text">Câu hỏi mở</option>
-                      <option value="option">Bình chọn</option>                  
+                      <option value="option">Bình chọn</option> 
+                      <option value="checkbox">Checkbox</option>                 
                     </select>
 
                     <!-- Answer container -->
@@ -405,7 +492,8 @@
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
                     <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question3_type"  id="question3_type" onchange="change_question3_type()">                          
                       <option value="text">Câu hỏi mở</option>
-                      <option value="option">Bình chọn</option>                  
+                      <option value="option">Bình chọn</option>    
+                      <option value="checkbox">Checkbox</option>              
                     </select>
 
                     <!-- Answer container -->
@@ -475,6 +563,172 @@
                   </div>                 
                 </div>
                 <!-- End Question 3 -->
+
+                <!-- Question 4 -->
+                <div class="row" id="question4">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Câu hỏi 4</label>
+                    <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text" name="question4" id="question4">
+                  </div>
+
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group" id = "confirmed_password_holder">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
+                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question4_type"  id="question4_type" onchange="change_question4_type()">                          
+                      <option value="text">Câu hỏi mở</option>
+                      <option value="option">Bình chọn</option>      
+                      <option value="checkbox">Checkbox</option>            
+                    </select>
+
+                    <!-- Answer container -->
+                    <div id="answers4" style="display: none; margin-top: 10px;">
+                      <!-- Answer A -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 1:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer41" id="answer41">
+                        </div>
+                      </div>
+                      <!-- End Answer A -->
+
+                      <!-- Answer B -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 2:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer42" id="answer42">
+                        </div>
+                      </div>
+                      <!-- End Answer B -->
+
+                      <!-- Answer C -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 3:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer43" id="answer43">
+                        </div>
+                      </div>
+                      <!-- End Answer C -->
+
+                      <!-- Answer D -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 4:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer44" id="answer44">
+                        </div>
+                      </div>
+                      <!-- End Answer D -->
+
+                      <!-- Answer E -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 5:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer45" id="answer45">
+                        </div>
+                      </div>
+                      <!-- End Answer E -->
+
+                    </div>
+                    <!-- End Answer container -->
+                  </div>                 
+                </div>
+                <!-- End Question 4 -->
+
+                <!-- Question 5 -->
+                <div class="row" id="question5">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Câu hỏi 5</label>
+                    <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text" name="question5" id="question5">
+                  </div>
+
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
+                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question5_type"  id="question5_type" onchange="change_question5_type()">                          
+                      <option value="text">Câu hỏi mở</option>
+                      <option value="option">Bình chọn</option> 
+                      <option value="checkbox">Checkbox</option>                 
+                    </select>
+
+                    <!-- Answer container -->
+                    <div id="answers5" style="display: none; margin-top: 10px;">
+                      <!-- Answer A -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 1:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer51" id="answer51">
+                        </div>
+                      </div>
+                      <!-- End Answer A -->
+
+                      <!-- Answer B -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 2:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer52" id="answer52">
+                        </div>
+                      </div>
+                      <!-- End Answer B -->
+
+                      <!-- Answer C -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 3:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer53" id="answer53">
+                        </div>
+                      </div>
+                      <!-- End Answer C -->
+
+                      <!-- Answer D -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 4:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer54" id="answer54">
+                        </div>
+                      </div>
+                      <!-- End Answer D -->
+
+                      <!-- Answer E -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 5:</label>                          
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer55" id="answer55">
+                        </div>
+                      </div>
+                      <!-- End Answer E -->
+
+                    </div>
+                    <!-- End Answer container -->
+                  </div>                 
+                </div>
+                <!-- End Question 5 -->
 
                 <div class="mb-4 text-center">
                   <input type="submit" class="btn btn-md u-btn-secondary rounded g-py-13 g-px-50" name="submit" value="Tạo">
@@ -607,7 +861,7 @@
   	</script>
   <script type="text/javascript">
     change_question1_type = function() {
-      if ($("#question1_type").val() == "option") {
+      if ($("#question1_type").val() != "text") {
         $("#answers1").show();
         $("#answer11").prop("required", true);
         $("#answer12").prop("required", true);
@@ -619,7 +873,7 @@
     }
 
     change_question2_type = function() {
-      if ($("#question2_type").val() == "option") {
+      if ($("#question2_type").val() != "text") {
         $("#answers2").show();
         $("#answer21").prop("required", true);
         $("#answer22").prop("required", true);
@@ -631,7 +885,7 @@
     }
 
     change_question3_type = function() {
-      if ($("#question3_type").val() == "option") {
+      if ($("#question3_type").val() != "text") {
         $("#answers3").show();
         $("#answer31").prop("required", true);
         $("#answer32").prop("required", true);
@@ -639,6 +893,30 @@
         $("#answers3").hide();
         $("#answer31").prop("required", false);
         $("#answer32").prop("required", false);
+      }
+    }
+
+    change_question4_type = function() {
+      if ($("#question4_type").val() != "text") {
+        $("#answers4").show();
+        $("#answer41").prop("required", true);
+        $("#answer42").prop("required", true);
+      } else {
+        $("#answers4").hide();
+        $("#answer41").prop("required", false);
+        $("#answer42").prop("required", false);
+      }
+    }
+
+    change_question5_type = function() {
+      if ($("#question5_type").val() != "text") {
+        $("#answers5").show();
+        $("#answer51").prop("required", true);
+        $("#answer52").prop("required", true);
+      } else {
+        $("#answers5").hide();
+        $("#answer51").prop("required", false);
+        $("#answer52").prop("required", false);
       }
     }
 

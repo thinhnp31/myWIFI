@@ -1,4 +1,3 @@
-
 <html>
 <head>
 	<title>Test Page</title>
@@ -27,22 +26,49 @@ iframe {
 </style>
 
 <body>
-	<div class="container">
-		<iframe src="https://www.youtube.com/embed/WlZuN_ouqEo?autoplay=1&controls=0" allow="autoplay" width="100%"></iframe>
-	</div>
+  <?php
+  if (isset($_GET['code'])) {
+    $code = $_GET['code'];
+    $app_id = "2161627994088865";
+    $app_secret = "eb7b6a74283a6dc5fa3dd7412c75b1b0";
+    $redirect_uri = urldecode("https://ctin.script-kiddie.net/mywifi/");
+    
+    //Get access token from FB
+    $facebook_access_token_uri = "https://graph.facebook.com/v3.2/oauth/access_token?client_id=".$app_id."&redirect_uri=".$redirect_uri."&client_secret=".$app_secret."&code=".$code;
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $facebook_access_token_uri);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $aResponse = json_decode($response);
+    $access_token = $aResponse->access_token;
+
+    //Get user profile
+    $facebook_profile_uri = "https://graph.facebook.com/me?access_token=".$access_token;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $facebook_profile_uri);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    $user = json_decode($response);
+    echo $user->name."<br>";
+      
+
+  } else {
+    ?>
+    <a href="https://www.facebook.com/dialog/oauth?client_id=2161627994088865&redirect_uri=https://ctin.script-kiddie.net/mywifi/&scope=public_profile">Login with Facebook</a>
+    <?php
+  }
+  ?>
+
+  
 	
-
-	<button type="button" id="submit_button">5</button>
-
-	<script type="text/javascript">
-		var countdown = 5;
-
-		var x  = setInterval(function() {
-			countdown -= 1;
-			document.getElementById("submit_button").innerHTML = countdown;
-			if (countdown <= 0)
-				clearInterval(x);
-		}, 1000);
-	</script>
 </body>
 </html>

@@ -100,12 +100,12 @@ and open the template in the editor.
         }
 
         //Check capacity
-        $incoming = $row['incoming'];
-        $outgoing = $row['outgoing'];
+        $used_incoming = $row['used_incoming'];
+        $used_outgoing = $row['used_outgoing'];
 
         $capacity = $row['capacity'];
 
-        if (($incoming > $capacity) || ($outgoing > $capacity)) {
+        if (($used_incoming > $capacity) || ($used_outgoing > $capacity)) {
             $out_of_capacity = 1;
         } else {
             $out_of_capacity = 0;
@@ -134,6 +134,9 @@ and open the template in the editor.
                     case 'local_account':
                         $redirect_url = "local_account.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
                         break;
+                    case 'survey':
+                        $redirect_url = "survey.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
+                        break;
                     default:
                         # code...
                         break;
@@ -155,6 +158,9 @@ and open the template in the editor.
                 break;
             case 'local_account':
                 $redirect_url = "local_account.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
+                break;
+            case 'survey':
+                $redirect_url = "survey.php?page_id=" . $page_id . "&gw_sn=" . $gw_sn . "&gw_address=" . $gw_address . "&gw_port=" . $gw_port . "&url=" . $url . "&mac=" . $mac;
                 break;
             default:
                 # code...

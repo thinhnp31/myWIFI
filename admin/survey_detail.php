@@ -33,7 +33,8 @@
     $msg = "";
     $type = "";
     if (isset($_POST['submit'])) {
-      $survey_name = $_POST['survey_name'];
+      $survey_id = $_POST['survey_id'];
+
       $question1 = $_POST['question1'];
       $question1_type = $_POST['question1_type'];
       if (isset($_POST['answer11']))
@@ -115,25 +116,95 @@
       else 
         $answer35 = "";
 
+      if (isset($_POST['question4']))
+        $question4 = $_POST['question4'];
+      else 
+        $question4 = "";
+      if (isset($_POST['question4_type'])) 
+        $question4_type = $_POST['question4_type'];
+      else 
+        $question4_type = "";
+      if (isset($_POST['answer41']))
+        $answer41 = $_POST['answer41'];
+      else 
+        $answer41 = "";
+      if (isset($_POST['answer42']))
+        $answer42 = $_POST['answer42'];
+      else 
+        $answer42 = "";
+      if (isset($_POST['answer43']))
+        $answer43 = $_POST['answer43'];
+      else 
+        $answer43 = ""; 
+      if (isset($_POST['answer44']))
+        $answer44 = $_POST['answer44'];
+      else 
+        $answer44 = ""; 
+      if (isset($_POST['answer45']))
+        $answer45 = $_POST['answer45'];
+      else 
+        $answer45 = "";
 
-      $stmt = $conn->prepare("DELETE FROM questions WHERE survey_name = ?");
-      $stmt->bind_param("s", $survey_name);
+      if (isset($_POST['question5']))
+        $question5 = $_POST['question5'];
+      else 
+        $question5 = "";
+      if (isset($_POST['question5_type'])) 
+        $question5_type = $_POST['question5_type'];
+      else 
+        $question5_type = "";
+      if (isset($_POST['answer51']))
+        $answer51 = $_POST['answer51'];
+      else 
+        $answer51 = "";
+      if (isset($_POST['answer52']))
+        $answer52 = $_POST['answer52'];
+      else 
+        $answer52 = "";
+      if (isset($_POST['answer53']))
+        $answer53 = $_POST['answer53'];
+      else 
+        $answer53 = ""; 
+      if (isset($_POST['answer54']))
+        $answer54 = $_POST['answer54'];
+      else 
+        $answer54 = ""; 
+      if (isset($_POST['answer55']))
+        $answer55 = $_POST['answer55'];
+      else 
+        $answer55 = "";
+
+
+      $stmt = $conn->prepare("DELETE FROM questions WHERE survey_id = ?");
+      $stmt->bind_param("i", $survey_id);
       $stmt-> execute();
 
 
-      $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_name, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
-      $stmt->bind_param("ssssssss", $question1, $question1_type, $survey_name, $answer11, $answer12, $answer13, $answer14, $answer15);
+      $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+      $stmt->bind_param("ssisssss", $question1, $question1_type, $survey_id, $answer11, $answer12, $answer13, $answer14, $answer15);
       $stmt->execute();
 
       if ($question2 != "") {
-        $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_name, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssssssss", $question2, $question2_type, $survey_name, $answer21, $answer22, $answer23, $answer24, $answer25);
+        $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssisssss", $question2, $question2_type, $survey_id, $answer21, $answer22, $answer23, $answer24, $answer25);
         $stmt->execute();
       }
 
       if ($question3 != "") {
-        $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_name, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
-        $stmt->bind_param("ssssssss", $question3, $question3_type, $survey_name, $answer31, $answer32, $answer33, $answer34, $answer35);
+        $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssisssss", $question3, $question3_type, $survey_id, $answer31, $answer32, $answer33, $answer34, $answer35);
+        $stmt->execute();
+      }
+
+      if ($question4 != "") {
+        $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssisssss", $question4, $question4_type, $survey_id, $answer41, $answer42, $answer43, $answer44, $answer45);
+        $stmt->execute();
+      }
+
+      if ($question5 != "") {
+        $stmt = $conn->prepare("INSERT INTO  questions(question, question_type, survey_id, answer1, answer2, answer3, answer4, answer5) VALUES(?,?,?,?,?,?,?,?)");
+        $stmt->bind_param("ssisssss", $question5, $question5_type, $survey_id, $answer51, $answer52, $answer53, $answer54, $answer55);
         $stmt->execute();
       }
 
@@ -216,15 +287,16 @@
               <h1 class="g-font-weight-300 g-font-size-28 g-color-black g-mb-30">Tạo khảo sát</h1>
               <!-- Form -->
               <?php
-                $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_name = ?");
-                $stmt->bind_param("s", $_GET['survey_name']);
+                $stmt = $conn->prepare("SELECT * FROM surveys WHERE survey_id = ?");
+                $stmt->bind_param("s", $_GET['survey_id']);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $row = $result->fetch_assoc();
+                $survey_id = $row['survey_id'];
                 $survey_name = $row['survey_name'];
 
-                $stmt = $conn->prepare("SELECT * FROM questions WHERE survey_name = ?");
-                $stmt->bind_param("s", $_GET['survey_name']);
+                $stmt = $conn->prepare("SELECT * FROM questions WHERE survey_id = ?");
+                $stmt->bind_param("s", $_GET['survey_id']);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 if ($row = $result->fetch_assoc()) {
@@ -254,32 +326,51 @@
                   $answer34 = $row['answer4'];
                   $answer35 = $row['answer5'];
                 }
-
+                if ($row = $result->fetch_assoc()) {
+                  $question4 = $row['question'];
+                  $question4_type = $row['question_type'];
+                  $answer41 = $row['answer1'];
+                  $answer42 = $row['answer2'];
+                  $answer43 = $row['answer3'];
+                  $answer44 = $row['answer4'];
+                  $answer45 = $row['answer5'];
+                }
+                if ($row = $result->fetch_assoc()) {
+                  $question5 = $row['question'];
+                  $question5_type = $row['question_type'];
+                  $answer51 = $row['answer1'];
+                  $answer52 = $row['answer2'];
+                  $answer53 = $row['answer3'];
+                  $answer54 = $row['answer4'];
+                  $answer55 = $row['answer5'];
+                }
 
               ?>
               <form class="g-py-15" method="POST" action="#">
                 <div class="mb-4">
                   <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Tên khảo sát: </label>
                   <input class="form-control g-color-black g-bg-white g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" name="survey_name" readonly value="<?php echo $survey_name;?>">
+                  <input type="hidden" name="survey_id" value="<?php echo $survey_id;?>">
                 </div>
 
 
                 <!-- Question 1 -->
                 <div class="row" id="question1">
-                  <div class="col-xs-12 col-sm-6 mb-4 form-group" id = "password_holder">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Câu hỏi 1</label>
                     <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text" name="question1" id="question1" required value="<?php echo $question1;?>">
                   </div>
 
-                  <div class="col-xs-12 col-sm-6 mb-4 form-group" id = "confirmed_password_holder">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
                     <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question1_type" required id="question1_type" onchange="change_question1_type()">                          
                       <option value="text" <?php if ($question1_type == "text") echo "selected";?>>Câu hỏi mở</option>
-                      <option value="option"  <?php if ($question1_type == "option") echo "selected";?>>Bình chọn</option>                  
+                      <option value="option"  <?php if ($question1_type == "option") echo "selected";?>>Bình chọn</option> 
+                      <option value="checkbox"  <?php if ($question1_type == "checkbox") echo "selected";?>>Checkbox</option>                 
                     </select>
 
                     <!-- Answer container -->
-                    <div id="answers1" style="display: <?php if ($question1_type == "text") echo "none"; else echo "block";?>; margin-top: 10px;">
+                    <div id="answers1" style="display: <?php if (($question1_type == "text") || ($question1_type == "")) echo "none"; else echo "block";?>; margin-top: 10px;">
                       <!-- Answer A -->
                       <div class="row">
                         <div class="col-xs-12 col-sm-6 mb-4 form-group" >
@@ -348,20 +439,21 @@
 
                 <!-- Question 2 -->
                 <div class="row" id="question2">
-                  <div class="col-xs-12 col-sm-6 mb-4 form-group" id = "password_holder">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Câu hỏi 2</label>
                     <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text" name="question2" id="question2"  value="<?php echo $question2;?>">
                   </div>
 
                   <div class="col-xs-12 col-sm-6 mb-4 form-group" id = "confirmed_password_holder">
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
-                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question2_type" required id="question2_type" onchange="change_question2_type()">     
+                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question2_type" id="question2_type" onchange="change_question2_type()">     
                       <option value="text" <?php if ($question2_type == "text") echo "selected";?>>Câu hỏi mở</option>
                       <option value="option"  <?php if ($question2_type == "option") echo "selected";?>>Bình chọn</option>
+                      <option value="checkbox"  <?php if ($question2_type == "checkbox") echo "selected";?>>Checkbox/option>
                     </select>
 
                     <!-- Answer container -->
-                    <div id="answers2" style="display: <?php if ($question2_type == "text") echo "none"; else echo "block";?>; margin-top: 10px;">
+                    <div id="answers2" style="display: <?php if (($question2_type == "text") || ($question2_type == "")) echo "none"; else echo "block";?>; margin-top: 10px;">
                       <!-- Answer A -->
                       <div class="row">
                         <div class="col-xs-12 col-sm-6 mb-4 form-group" >
@@ -428,26 +520,23 @@
                 </div>
                 <!-- End Question 2 -->
 
-
-
-
-
                 <!-- Question 3 -->
                 <div class="row" id="question3">
-                  <div class="col-xs-12 col-sm-6 mb-4 form-group" id = "password_holder">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Câu hỏi 3</label>
                     <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text" name="question3" id="question3"  value="<?php echo $question3;?>">
                   </div>
 
-                  <div class="col-xs-12 col-sm-6 mb-4 form-group" id = "confirmed_password_holder">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
                     <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
-                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question3_type" required id="question3_type" onchange="change_question3_type()">     
+                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question3_type" id="question3_type" onchange="change_question3_type()">     
                       <option value="text" <?php if ($question3_type == "text") echo "selected";?>>Câu hỏi mở</option>
                       <option value="option"  <?php if ($question3_type == "option") echo "selected";?>>Bình chọn</option>
+                      <option value="checkbox"  <?php if ($question3_type == "checkbox") echo "selected";?>>Checkbox</option>
                     </select>
 
                     <!-- Answer container -->
-                    <div id="answers3" style="display: <?php if ($question3_type == "text") echo "none"; else echo "block";?>; margin-top: 10px;">
+                    <div id="answers3" style="display: <?php if (($question3_type == "text") || ($question3_type == "")) echo "none"; else echo "block";?>; margin-top: 10px;">
                       <!-- Answer A -->
                       <div class="row">
                         <div class="col-xs-12 col-sm-6 mb-4 form-group" >
@@ -514,7 +603,171 @@
                 </div>
                 <!-- End Question 3 -->
 
+                <!-- Question 4 -->
+                <div class="row" id="question4">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Câu hỏi 4</label>
+                    <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text" name="question4" id="question4"  value="<?php echo $question4;?>">
+                  </div>
 
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
+                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question4_type" id="question4_type" onchange="change_question4_type()">     
+                      <option value="text" <?php if ($question4_type == "text") echo "selected";?>>Câu hỏi mở</option>
+                      <option value="option"  <?php if ($question4_type == "option") echo "selected";?>>Bình chọn</option>
+                      <option value="checkbox"  <?php if ($question4_type == "checkbox") echo "selected";?>>Checkbox</option>
+                    </select>
+
+                    <!-- Answer container -->
+                    <div id="answers4" style="display: <?php if (($question4_type == "text") || ($question4_type == "")) echo "none"; else echo "block";?>; margin-top: 10px;">
+                      <!-- Answer A -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 1:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer41" id="answer41" value="<?php echo $answer41;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer A -->
+
+                      <!-- Answer B -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 2:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer42" id="answer42" value="<?php echo $answer42;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer B -->
+
+                      <!-- Answer C -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 3:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer43" id="answer43" value="<?php echo $answer43;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer C -->
+
+                      <!-- Answer D -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 4:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer44" id="answer44" value="<?php echo $answer44;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer D -->
+
+                      <!-- Answer E -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 5:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer45" id="answer45" value="<?php echo $answer45;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer E -->
+
+                    </div>
+                    <!-- End Answer container -->
+                  </div>
+                </div>
+                <!-- End Question 4 -->
+
+                <!-- Question 5 -->
+                <div class="row" id="question5">
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Câu hỏi 5</label>
+                    <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text" name="question5" id="question5"  value="<?php echo $question5;?>">
+                  </div>
+
+                  <div class="col-xs-12 col-sm-6 mb-4 form-group">
+                    <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Loại câu hỏi</label>
+                    <select class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover" style="padding-top: 5px;" name="question5_type" id="question5_type" onchange="change_question5_type()">     
+                      <option value="text" <?php if ($question5_type == "text") echo "selected";?>>Câu hỏi mở</option>
+                      <option value="option"  <?php if ($question5_type == "option") echo "selected";?>>Bình chọn</option>
+                      <option value="checkbox"  <?php if ($question5_type == "checkbox") echo "selected";?>>Checkbox</option>
+                    </select>
+
+                    <!-- Answer container -->
+                    <div id="answers5" style="display: <?php if (($question5_type == "text") || ($question5_type == "")) echo "none"; else echo "block";?>; margin-top: 10px;">
+                      <!-- Answer A -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 1:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer51" id="answer51" value="<?php echo $answer51;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer A -->
+
+                      <!-- Answer B -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 2:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer52" id="answer52" value="<?php echo $answer52;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer B -->
+
+                      <!-- Answer C -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 3:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer53" id="answer53" value="<?php echo $answer53;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer C -->
+
+                      <!-- Answer D -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 4:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer54" id="answer54" value="<?php echo $answer54;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer D -->
+
+                      <!-- Answer E -->
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <label class="g-color-gray-dark-v2 g-font-weight-600 g-font-size-13">Đáp án 5:</label>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6 mb-4 form-group" >
+                          <input class="form-control form-control-md g-bg-white--focus g-brd-gray-light-v4 g-brd-primary--hover rounded g-py-15 g-px-15" type="text"  name="answer55" id="answer55" value="<?php echo $answer55;?>">
+                        </div>
+                      </div>
+                      <!-- End Answer E -->
+
+                    </div>
+                    <!-- End Answer container -->
+                  </div>
+                </div>
+                <!-- End Question 5 -->
 
                 <div class="mb-4 text-center">
                   <input type="submit" class="btn btn-md u-btn-secondary rounded g-py-13 g-px-50" name="submit" value="Tạo">
@@ -647,7 +900,7 @@
   	</script>
   <script type="text/javascript">
     change_question1_type = function() {
-      if ($("#question1_type").val() == "option") {
+      if ($("#question1_type").val() != "text") {
         $("#answers1").show();
         $("#answer11").prop("required", true);
         $("#answer12").prop("required", true);
@@ -659,7 +912,7 @@
     }
 
     change_question2_type = function() {
-      if ($("#question2_type").val() == "option") {
+      if ($("#question2_type").val() != "text") {
         $("#answers2").show();
         $("#answer21").prop("required", true);
         $("#answer22").prop("required", true);
@@ -671,7 +924,7 @@
     }
 
     change_question3_type = function() {
-      if ($("#question3_type").val() == "option") {
+      if ($("#question3_type").val() != "text") {
         $("#answers3").show();
         $("#answer31").prop("required", true);
         $("#answer32").prop("required", true);
@@ -679,6 +932,30 @@
         $("#answers3").hide();
         $("#answer31").prop("required", false);
         $("#answer32").prop("required", false);
+      }
+    }
+
+    change_question4_type = function() {
+      if ($("#question4_type").val() != "text") {
+        $("#answers4").show();
+        $("#answer41").prop("required", true);
+        $("#answer42").prop("required", true);
+      } else {
+        $("#answers4").hide();
+        $("#answer41").prop("required", false);
+        $("#answer42").prop("required", false);
+      }
+    }
+
+    change_question5_type = function() {
+      if ($("#question5_type").val() != "text") {
+        $("#answers5").show();
+        $("#answer51").prop("required", true);
+        $("#answer52").prop("required", true);
+      } else {
+        $("#answers5").hide();
+        $("#answer51").prop("required", false);
+        $("#answer52").prop("required", false);
       }
     }
 

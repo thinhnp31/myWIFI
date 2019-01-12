@@ -191,7 +191,7 @@
                           while ($row = $result->fetch_assoc()) {
                             $mac = $row['mac'];
                             $profile_name = $row['profile_name'];
-                            $used = max($row['incoming'], $row['outgoing']);
+                            $used = max($row['used_incoming'], $row['used_outgoing']);
                             $capacity = $row['capacity'];
                             $remained = $capacity - $used;
                             if ($remained < 0) $remained = 0;
@@ -199,7 +199,9 @@
                             $time = strtotime($row['time']);
                             $now = strtotime(date("Y-m-d H:i:s"));
                             $diff = round(($now - $time) / 60);
-                            if ($diff < 0) $diff == 0;
+                            $remained_time = $timeout - $diff;
+                            if ($remained_time < 0) 
+                              $remained_time = 0;
                   ?>
                             <form method="POST" action="#">
                             <tr>
@@ -218,7 +220,7 @@
                                 if ($timeout == 0) 
                                   echo "Không giới hạn";
                                 else 
-                                  echo $diff;
+                                  echo $remained_time;
                                 ?>
                               </td>
                               <td><?php echo $row['time']; ?></td>
